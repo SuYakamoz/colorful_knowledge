@@ -22,6 +22,7 @@ ALLOWED = {
     "/data/common_sense.jsonl": "data/common_sense.jsonl",
     "/data/latest.json": "data/latest.json",
     "/assets/logo.png": "assets/logo.png",
+    "/assets/logo-main.jpg": "assets/logo-main.jpg",
     "/assets/七彩知识宝盒.jpg": "assets/七彩知识宝盒.jpg",
 }
 
