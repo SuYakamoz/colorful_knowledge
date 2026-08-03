@@ -24,7 +24,11 @@ def load_dotenv() -> None:
             if not line or line.startswith("#") or "=" not in line:
                 continue
             key, _, value = line.partition("=")
-            key, value = key.strip(), value.strip()
+            key = key.strip()
+            value = value.strip()
+            # 支持行内注释:值里 # 之后的内容忽略(如 KEY=xxx # 注释)
+            if "#" in value:
+                value = value.split("#", 1)[0].strip()
             if key and key not in os.environ:
                 os.environ[key] = value
 
