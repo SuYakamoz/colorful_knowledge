@@ -64,7 +64,11 @@
   .section-title { font-size: 15px; font-weight: 800; color: #9C93B0; margin: 6px 4px 12px; }
   .day-card { padding: 16px 18px 12px; margin-bottom: 12px; transition: transform .18s, box-shadow .18s; }
   .day-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(90,70,150,.16); }
-  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; cursor: pointer; user-select: none; }
+  .arrow { margin-left: auto; font-size: 12px; color: #B7AECF; transition: transform .2s; }
+  .day-card.collapsed .arrow { transform: rotate(-90deg); }
+  .day-card.collapsed .day-items { display: none; }
+  .day-items { }
   .day-date { font-weight: 800; font-size: 14px; background: linear-gradient(90deg,#EC4899,#8B5CF6); -webkit-background-clip: text; background-clip: text; color: transparent; }
   .day-src { font-size: 11px; color: #92400E; background: rgba(255,255,255,.6); padding: 2px 8px; border-radius: 999px; }
 
@@ -116,12 +120,19 @@ fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
   if (!rows.length) { el.innerHTML = '<div class="empty">暂无数据,明天开始积累</div>'; return; }
   var byDate = {};
   rows.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
-  el.innerHTML = Object.entries(byDate).map(([d, items]) =>
-    '<div class="day-card glass"><div class="day-head"><span class="day-date">' + d + '</span>' +
-    (items[0].source === "ai" ? "" : '<span class="day-src">知识库兜底</span>') + '</div>' +
+  var dates = Object.entries(byDate);
+  el.innerHTML = dates.map(([d, items], idx) =>
+    '<div class="day-card glass' + (idx >= 3 ? ' collapsed' : '') + '"><div class="day-head"><span class="day-date">' + d + '</span>' +
+    (items[0].source === "ai" ? "" : '<span class="day-src">知识库兜底</span>') +
+    '<span class="arrow">▾</span></div><div class="day-items">' +
     items.map(itemHtml).join("") +
-    '</div>').join("");
-  document.getElementById("footer").textContent = "共积累 " + rows.length + " 条常识";
+    '</div></div>').join("");
+    document.getElementById("footer").textContent = "共积累 " + rows.length + " 条常识";
+  // 点击日期头部:折叠/展开当天
+  document.getElementById("list").addEventListener("click", function(e) {
+    var head = e.target.closest(".day-head");
+    if (head) { head.parentElement.classList.toggle("collapsed"); }
+  });
 }).catch(() => { document.getElementById("list").innerHTML = '<div class="empty">数据读取失败</div>'; });
 </script>
 </body>
