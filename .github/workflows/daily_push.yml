@@ -1,0 +1,41 @@
+name: Daily Common Sense Push
+
+on:
+  schedule:
+    # cron 使用 UTC 时区:UTC 00:00 = 北京时间 08:00
+    - cron: '0 0 * * *'
+  workflow_dispatch: # 支持在 GitHub 页面上手动触发(测试用)
+
+# 允许把每天积累的常识数据提交回仓库
+permissions:
+  contents: write
+
+jobs:
+  push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run daily push
+        env:
+          SERVERCHAN_SENDKEY: ${{ secrets.SERVERCHAN_SENDKEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          # 以下两个可选:不配 Secret 时脚本自动用默认值(deepseek-chat / https://api.deepseek.com)
+          # 想换任意 OpenAI 兼容模型,配 Secret 即可(如通义/智谱/OpenAI 的 base_url 与模型名)
+          DEEPSEEK_MODEL: ${{ secrets.DEEPSEEK_MODEL }}
+          DEEPSEEK_BASE_URL: ${{ secrets.DEEPSEEK_BASE_URL }}
+        run: python push_daily.py
+
+      - name: Commit collected data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet || git commit -m "chore: 积累今日常识数据"
+          git push
