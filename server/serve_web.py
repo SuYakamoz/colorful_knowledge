@@ -11,6 +11,7 @@
 import os
 import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
+import urllib.parse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))  # 项目根
 
@@ -21,6 +22,7 @@ ALLOWED = {
     "/data/common_sense.jsonl": "data/common_sense.jsonl",
     "/data/latest.json": "data/latest.json",
     "/assets/logo.png": "assets/logo.png",
+    "/assets/七彩知识宝盒.jpg": "assets/七彩知识宝盒.jpg",
 }
 
 
@@ -29,7 +31,8 @@ class WhitelistHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=ROOT, **kwargs)
 
     def do_GET(self):
-        path = self.path.split("?")[0].split("#")[0]  # 去掉企业微信附加参数
+        # URL 解码(中文文件名需解码后才能匹配白名单)+ 去掉附加参数
+        path = urllib.parse.unquote(self.path.split("?")[0].split("#")[0])
         if path in ALLOWED:
             self.path = "/" + ALLOWED[path]
             return super().do_GET()

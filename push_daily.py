@@ -113,9 +113,9 @@ def build_lunar_line() -> str:
 
 
 def build_message(items: list[tuple[str, str]]) -> tuple[str, str]:
-    """把农历信息 + 选中的常识拼成 (标题, 内容)。"""
+    """把选中的常识拼成 (标题, 内容)。"""
     title = "📚 今日常识 3 条"
-    lines = [build_lunar_line(), ""]
+    lines = []
     for cat, text in items:
         lines.append(f"{icon_for(cat)}【{cat}】{text}")
     return title, "\n".join(lines)

@@ -8,96 +8,68 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
-    min-height: 100vh; color: #E5E0F5; padding: 20px 14px 48px;
-    background: radial-gradient(1200px 600px at 10% -10%, #241545 0%, transparent 60%),
-                radial-gradient(1000px 500px at 110% 20%, #122A3A 0%, transparent 55%),
-                linear-gradient(160deg, #0F0A1F 0%, #1A1033 50%, #0E0A22 100%);
+    min-height: 100vh; color: #4A4458; padding: 20px 14px 48px;
+    background: linear-gradient(150deg, #FDF2F8 0%, #F3F0FF 35%, #EDE9FE 70%, #FCE7F3 100%);
     position: relative; overflow-x: hidden;
   }
-  /* 霓虹光斑 */
-  .blob { position: fixed; border-radius: 50%; filter: blur(90px); opacity: .35; z-index: 0; pointer-events: none; }
-  .blob-1 { width: 340px; height: 340px; background: #F472B6; top: -100px; right: -80px; }
-  .blob-2 { width: 300px; height: 300px; background: #8B5CF6; bottom: -80px; left: -70px; }
-  .blob-3 { width: 220px; height: 220px; background: #22D3EE; top: 45%; left: 72%; opacity: .22; }
+  /* 背景光斑 */
+  .blob { position: fixed; border-radius: 50%; filter: blur(70px); opacity: .45; z-index: 0; pointer-events: none; }
+  .blob-1 { width: 320px; height: 320px; background: #F9A8D4; top: -80px; right: -80px; }
+  .blob-2 { width: 280px; height: 280px; background: #C4B5FD; bottom: -60px; left: -60px; }
+  .blob-3 { width: 200px; height: 200px; background: #FBCFE8; top: 40%; left: 70%; }
 
   .container { max-width: 700px; margin: 0 auto; position: relative; z-index: 1; }
 
-  /* 渐变边框卡片(NFT 经典手法) */
-  .frame {
-    background: linear-gradient(120deg, rgba(244,114,182,.75), rgba(139,92,246,.75), rgba(34,211,238,.7));
-    padding: 1.5px; border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(139, 92, 246, .22);
-    margin-bottom: 16px;
-  }
-  .card {
-    background: linear-gradient(160deg, rgba(30,20,60,.85), rgba(18,14,40,.9));
-    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-    border-radius: 18.5px; padding: 18px 20px;
+  /* 玻璃卡片 */
+  .glass {
+    background: rgba(255, 255, 255, .6);
+    backdrop-filter: blur(20px) saturate(150%);
+    -webkit-backdrop-filter: blur(20px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, .75);
+    box-shadow: 0 8px 32px rgba(90, 70, 150, .10);
+    border-radius: 18px;
   }
 
   /* 头部 */
-  .header { text-align: center; margin: 10px 0 26px; }
+  .header { text-align: center; margin: 10px 0 24px; }
   .logo {
-    width: 84px; height: 84px; border-radius: 24px; margin: 0 auto 14px;
-    box-shadow: 0 0 30px rgba(244,114,182,.4), 0 0 60px rgba(139,92,246,.25); display: block;
+    width: 84px; height: 84px; border-radius: 22px; margin: 0 auto 14px;
+    box-shadow: 0 10px 28px rgba(236, 72, 153, .16); display: block; object-fit: cover;
   }
   h1 {
-    font-size: 27px; font-weight: 800; letter-spacing: 1px;
-    background: linear-gradient(90deg, #F472B6, #C084FC, #22D3EE);
+    font-size: 25px; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(90deg, #EC4899, #8B5CF6);
     -webkit-background-clip: text; background-clip: text; color: transparent;
-    filter: drop-shadow(0 0 12px rgba(192,132,252,.35));
   }
-  .subtitle { color: #8D84B0; font-size: 13px; margin-top: 6px; }
+  .subtitle { color: #9C93B0; font-size: 13px; margin-top: 6px; }
 
   /* 今日卡片 */
+  .today-card { padding: 20px 20px 14px; margin-bottom: 22px; }
   .today-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 6px; }
-  .today-title { font-size: 16px; font-weight: 800; color: #F0ABFC; text-shadow: 0 0 14px rgba(240,171,252,.4); }
-  .today-date { font-size: 12px; color: #9FE8EF; background: rgba(34,211,238,.12); border: 1px solid rgba(34,211,238,.35); padding: 3px 10px; border-radius: 999px; }
-  .lunar-line {
-    background: rgba(244,114,182,.08); border: 1px solid rgba(244,114,182,.35);
-    border-radius: 12px; padding: 8px 12px; margin-bottom: 10px;
-    font-size: 13px; color: #FBBF24; font-weight: 600; text-shadow: 0 0 10px rgba(251,191,36,.25);
-  }
-  .today-item { display: flex; gap: 8px; margin: 10px 0; font-size: 14.5px; line-height: 1.7; }
-  .today-item .tag { flex-shrink: 0; margin-top: 2px; }
-  .today-item span:last-child { flex: 1; min-width: 0; word-break: break-word; color: #E5E0F5; }
+  .today-title { font-size: 16px; font-weight: 800; background: linear-gradient(90deg,#EC4899,#8B5CF6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .today-date { font-size: 12px; color: #7C6FA8; background: rgba(255,255,255,.65); padding: 3px 10px; border-radius: 999px; }
 
-  /* 标签:霓虹渐变 + 白字 */
+  /* 条目分块:标签固定列 + 内容列(保证对齐) */
+  .item { display: grid; grid-template-columns: 84px 1fr; gap: 10px; margin: 10px 0; align-items: start; }
   .tag {
-    display: inline-block; border-radius: 8px; padding: 2px 11px;
-    font-size: 12px; font-weight: 700; color: #fff; white-space: nowrap; align-self: flex-start;
-    text-shadow: 0 1px 3px rgba(0,0,0,.35); letter-spacing: .3px;
+    justify-self: stretch; text-align: center;
+    background: rgba(236, 72, 153, .10); color: #A21CAF;
+    border: 1px solid rgba(236, 72, 153, .18);
+    border-radius: 10px; padding: 4px 4px; font-size: 12.5px; font-weight: 700;
+    min-height: 30px; display: flex; align-items: center; justify-content: center;
   }
-  .tag[data-c="金融"] { background: linear-gradient(135deg,#F59E0B,#F97316); box-shadow: 0 0 10px rgba(245,158,11,.35); }
-  .tag[data-c="职场"] { background: linear-gradient(135deg,#3B82F6,#6366F1); box-shadow: 0 0 10px rgba(59,130,246,.35); }
-  .tag[data-c="生活"] { background: linear-gradient(135deg,#F97316,#EC4899); box-shadow: 0 0 10px rgba(236,72,153,.3); }
-  .tag[data-c="科学"] { background: linear-gradient(135deg,#8B5CF6,#A855F7); box-shadow: 0 0 10px rgba(139,92,246,.4); }
-  .tag[data-c="历史"] { background: linear-gradient(135deg,#B45309,#D97706); box-shadow: 0 0 10px rgba(217,119,6,.3); }
-  .tag[data-c="健康"] { background: linear-gradient(135deg,#10B981,#34D399); box-shadow: 0 0 10px rgba(16,185,129,.35); }
-  .tag[data-c="冷知识"] { background: linear-gradient(135deg,#EC4899,#F472B6); box-shadow: 0 0 10px rgba(236,72,153,.4); }
-  .tag[data-c="法律"] { background: linear-gradient(135deg,#6366F1,#818CF8); box-shadow: 0 0 10px rgba(99,102,241,.35); }
-  .tag[data-c="科技"] { background: linear-gradient(135deg,#06B6D4,#3B82F6); box-shadow: 0 0 10px rgba(6,182,212,.4); }
-  .tag[data-c="心理"] { background: linear-gradient(135deg,#14B8A6,#2DD4BF); box-shadow: 0 0 10px rgba(20,184,166,.35); }
-  .tag[data-c="安全"] { background: linear-gradient(135deg,#EF4444,#F87171); box-shadow: 0 0 10px rgba(239,68,68,.35); }
-  .tag[data-c="商业"] { background: linear-gradient(135deg,#D97706,#F59E0B); box-shadow: 0 0 10px rgba(245,158,11,.35); }
-  .tag[data-c="教育"] { background: linear-gradient(135deg,#84CC16,#A3E635); box-shadow: 0 0 10px rgba(132,204,22,.35); }
-  .tag[data-c="地理"] { background: linear-gradient(135deg,#06B6D4,#22D3EE); box-shadow: 0 0 10px rgba(34,211,238,.4); }
-  .tag[data-c="运动"] { background: linear-gradient(135deg,#EA580C,#F97316); box-shadow: 0 0 10px rgba(249,115,22,.35); }
-  .tag[data-c="文化"] { background: linear-gradient(135deg,#A855F7,#D946EF); box-shadow: 0 0 10px rgba(168,85,247,.4); }
-  .tag[data-c="默认"] { background: linear-gradient(135deg,#6B7280,#9CA3AF); box-shadow: 0 0 8px rgba(107,114,128,.3); }
+  .content { font-size: 14.5px; line-height: 1.7; padding-top: 2px; word-break: break-word; }
 
   /* 历史列表 */
-  .section-title { font-size: 15px; font-weight: 800; color: #8D84B0; margin: 8px 4px 12px; letter-spacing: .5px; }
-  .frame { margin-bottom: 14px; }
-  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-  .day-date { font-weight: 800; font-size: 14px; color: #C084FC; text-shadow: 0 0 12px rgba(192,132,252,.35); }
-  .day-src { font-size: 11px; color: #FBBF24; background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3); padding: 2px 8px; border-radius: 999px; }
-  .day-item { display: flex; gap: 8px; margin: 8px 0; font-size: 14px; line-height: 1.75; color: #CFC8E8; }
-  .day-item .tag { flex-shrink: 0; margin-top: 2px; }
-  .day-item span:last-child { flex: 1; min-width: 0; word-break: break-word; }
+  .section-title { font-size: 15px; font-weight: 800; color: #9C93B0; margin: 6px 4px 12px; }
+  .day-card { padding: 16px 18px 12px; margin-bottom: 12px; transition: transform .18s, box-shadow .18s; }
+  .day-card:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(90,70,150,.16); }
+  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .day-date { font-weight: 800; font-size: 14px; background: linear-gradient(90deg,#EC4899,#8B5CF6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .day-src { font-size: 11px; color: #92400E; background: rgba(255,255,255,.6); padding: 2px 8px; border-radius: 999px; }
 
-  .empty { text-align: center; color: #6E6690; padding: 48px 0; font-size: 14px; }
-  .footer { text-align: center; color: #6E6690; font-size: 12px; margin-top: 26px; }
+  .empty { text-align: center; color: #B7AECF; padding: 48px 0; font-size: 14px; }
+  .footer { text-align: center; color: #B7AECF; font-size: 12px; margin-top: 26px; }
 </style>
 </head>
 <body>
@@ -106,7 +78,7 @@
   <div class="blob blob-3"></div>
 <div class="container">
   <div class="header">
-    <img class="logo" src="assets/logo.png" alt="多彩知识宝盒">
+    <img class="logo" src="assets/七彩知识宝盒.jpg" alt="多彩知识宝盒">
     <h1>多彩知识宝盒</h1>
     <div class="subtitle">每天 3 条常识 · 天天长知识</div>
   </div>
@@ -121,28 +93,21 @@
 
 <script>
 function tag(cat) {
-  var key = "默认";
-  var map = ["金融","职场","生活","科学","历史","健康","冷知识","法律","科技","心理","安全","商业","教育","地理","运动","文化"];
-  for (var i = 0; i < map.length; i++) {
-    if (cat.indexOf(map[i]) !== -1) { key = map[i]; break; }
-  }
-  return '<span class="tag" data-c="' + key + '">' + cat + '</span>';
+  return '<span class="tag">' + cat + '</span>';
+}
+
+function itemHtml(i) {
+  return '<div class="item">' + tag(i.category) + '<div class="content">' + i.content + '</div></div>';
 }
 
 fetch("data/latest.json").then(r => r.ok ? r.json() : null).then(latest => {
   var el = document.getElementById("latest");
   if (!latest || !latest.items || !latest.items.length) { el.innerHTML = ""; return; }
-  var lunarHtml = "";
-  if (latest.lunar) {
-    lunarHtml = '<div class="lunar-line">📅 ' + latest.lunar.lunar + " · " + latest.lunar.ganzhi +
-      (latest.lunar.term ? " · ☀️" + latest.lunar.term : "") +
-      (latest.lunar.festival ? " · 🎉" + latest.lunar.festival : "") + '</div>';
-  }
-  el.innerHTML = '<div class="frame"><div class="card">' +
+  el.innerHTML = '<div class="today-card glass">' +
     '<div class="today-head"><span class="today-title">📌 今日卡片</span>' +
-    '<span class="today-date">' + latest.date + '</span></div>' + lunarHtml +
-    latest.items.map(i => '<div class="today-item">' + tag(i.category) + '<span>' + i.content + '</span></div>').join("") +
-    '</div></div>';
+    '<span class="today-date">' + latest.date + '</span></div>' +
+    latest.items.map(itemHtml).join("") +
+    '</div>';
 }).catch(() => {});
 
 fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
@@ -152,10 +117,10 @@ fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
   var byDate = {};
   rows.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
   el.innerHTML = Object.entries(byDate).map(([d, items]) =>
-    '<div class="frame"><div class="card"><div class="day-head"><span class="day-date">' + d + '</span>' +
+    '<div class="day-card glass"><div class="day-head"><span class="day-date">' + d + '</span>' +
     (items[0].source === "ai" ? "" : '<span class="day-src">知识库兜底</span>') + '</div>' +
-    items.map(i => '<div class="day-item">' + tag(i.category) + '<span>' + i.content + '</span></div>').join("") +
-    '</div></div>').join("");
+    items.map(itemHtml).join("") +
+    '</div>').join("");
   document.getElementById("footer").textContent = "共积累 " + rows.length + " 条常识";
 }).catch(() => { document.getElementById("list").innerHTML = '<div class="empty">数据读取失败</div>'; });
 </script>
