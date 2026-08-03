@@ -75,8 +75,21 @@ DATA_FILE = "data/common_sense.jsonl"   # 保存路径(相对本项目根目录)
 # ============================================================
 # ④ 推送通道设置(改这里)
 # ============================================================
+# 推送通道选择:"serverchan"(Server酱微信推送)或 "wecom"(企业微信自建应用,官方 API 真卡片)
+PUSH_CHANNEL = get_secret("PUSH_CHANNEL", "serverchan")
+
+# ---- Server酱通道(需 SERVERCHAN_SENDKEY)----
 SERVERCHAN_API = "https://sctapi.ftqq.com/{sendkey}.send"   # Server酱接口
 SERVERCHAN_SENDKEY_ENV = "SERVERCHAN_SENDKEY"               # SendKey 的环境变量名
+
+# ---- 企业微信通道(官方 API,真卡片,不经过第三方平台)----
+# 注册:qy.weixin.qq.com 免费注册 → 应用管理 → 创建自建应用 → 拿 CorpID / AgentId / Secret
+WECOM_CORP_ID = get_secret("WECOM_CORP_ID")                 # 企业 ID
+WECOM_AGENT_ID = get_secret("WECOM_AGENT_ID")               # 自建应用 AgentId
+WECOM_SECRET = get_secret("WECOM_SECRET")                   # 自建应用 Secret
+WECOM_TOUSER = get_secret("WECOM_TOUSER", "@all")           # 接收人(默认全员;单人填你的企业微信 userid)
+WECOM_CARD_TYPE = get_secret("WECOM_CARD_TYPE", "textcard") # 卡片类型:"textcard"(文本卡片)或 "markdown"
+WECOM_CARD_URL = get_secret("WECOM_CARD_URL", "https://github.com/SuYakamoz/colorful-_knowledge")  # textcard 点击跳转链接
 
 # ============================================================
 # 生效值(一般不用改)

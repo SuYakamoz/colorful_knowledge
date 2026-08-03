@@ -31,9 +31,16 @@ from config import (
     AI_USER_PROMPT,
     DAILY_COUNT,
     DATA_FILE,
+    PUSH_CHANNEL,
     SAVE_ENABLED,
     SERVERCHAN_API,
     SERVERCHAN_SENDKEY,
+    WECOM_AGENT_ID,
+    WECOM_CARD_TYPE,
+    WECOM_CARD_URL,
+    WECOM_CORP_ID,
+    WECOM_SECRET,
+    WECOM_TOUSER,
 )
 from knowledge_base import CATEGORY_ICONS, KNOWLEDGE_BASE
 
@@ -146,6 +153,49 @@ def send_serverchan(sendkey: str, title: str, content: str) -> bool:
         return '"code":0' in body
 
 
+# ============ 企业微信通道(官方 API,真卡片,不经过第三方平台) ============
+
+def get_wecom_token(corpid: str, secret: str) -> str:
+    """获取企业微信 access_token。"""
+    url = f"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={corpid}&corpsecret={secret}"
+    with urllib.request.urlopen(url, timeout=15) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+    if body.get("errcode") != 0:
+        raise RuntimeError(f"获取 access_token 失败:{body}")
+    return body["access_token"]
+
+
+def send_wecom_message(token: str, agentid: str, payload: dict) -> bool:
+    """发送企业微信应用消息,成功返回 True。"""
+    url = f"https://qyapi.weixin.qq.com/cgi-bin/message/send?access_token={token}"
+    payload["agentid"] = int(agentid)
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"}, method="POST")
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        body = json.loads(resp.read().decode("utf-8"))
+    print("企业微信响应:", body)
+    return body.get("errcode") == 0
+
+
+def send_wecom(title: str, items: list[tuple[str, str]]) -> bool:
+    """企业微信通道入口:按 WECOM_CARD_TYPE 发 textcard 卡片或 markdown 卡片。"""
+    if not (WECOM_CORP_ID and WECOM_AGENT_ID and WECOM_SECRET):
+        raise RuntimeError("未配置企业微信(WECOM_CORP_ID / WECOM_AGENT_ID / WECOM_SECRET,见 .env.example)")
+    token = get_wecom_token(WECOM_CORP_ID, WECOM_SECRET)
+    lines = [f"{icon_for(cat)}【{cat}】{text}" for cat, text in items]
+    if WECOM_CARD_TYPE == "markdown":
+        md_content = f"## {title}\n" + "\n".join(f"> {line}" for line in lines)
+        return send_wecom_message(token, WECOM_AGENT_ID,
+                                  {"touser": WECOM_TOUSER, "msgtype": "markdown",
+                                   "markdown": {"content": md_content}})
+    # 默认 textcard 卡片(描述限 512 字,截断保护)
+    desc = "\n".join(lines)[:512]
+    return send_wecom_message(token, WECOM_AGENT_ID,
+                              {"touser": WECOM_TOUSER, "msgtype": "textcard",
+                               "textcard": {"title": title, "description": desc,
+                                            "url": WECOM_CARD_URL, "btntxt": "查看详情"}})
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="常识每日推送")
     parser.add_argument("--dry-run", action="store_true", help="只打印消息,不真正推送")
@@ -187,6 +237,15 @@ def main() -> None:
         print("[dry-run] 未发送,以上为将推送的内容")
         return
 
+    if PUSH_CHANNEL == "wecom":
+        try:
+            ok = send_wecom(title, items)
+        except Exception as e:
+            print(f"企业微信推送失败:{e}", file=sys.stderr)
+            sys.exit(1)
+        sys.exit(0 if ok else 1)
+
+    # 默认 Server酱
     if not SERVERCHAN_SENDKEY:
         print("错误:未配置 Server酱 SendKey(见 config.py / .env 的 SERVERCHAN_SENDKEY)", file=sys.stderr)
         sys.exit(1)

@@ -134,6 +134,22 @@ python push_daily.py               # 真实发送到微信
   - `SERVERCHAN_SENDKEY` = Server酱 SendKey(sct.ftqq.com 注册,微信扫码关注后获取);
 - **云端**:不用复制 `.env`,直接在 GitHub 仓库配同名 Secret(`SERVERCHAN_SENDKEY`、`DEEPSEEK_API_KEY` 必配,`DEEPSEEK_MODEL`、`DEEPSEEK_BASE_URL` 可选),自动优先生效。
 
+## 💬 推送通道二选一
+
+**默认用 Server酱**(微信服务号,简单);想用**企业微信真卡片**(官方 API,不经过第三方,支持 textcard/markdown 卡片样式),按下面配置:
+
+1. 免费注册企业微信:https://qy.weixin.qq.com(个人也能注册,不需要营业执照);
+2. **应用管理 → 创建应用**(自建)→ 记下三个值:`CorpID`(我的企业→企业信息)、`AgentId`、`Secret`;
+3. 应用详情里设置**可见范围**包含你自己(或全员),在"微信插件"里扫码关注你的企业微信(消息可直接进微信);
+4. 在 `.env`(本地)或 GitHub Secret(云端)配置:
+   - `PUSH_CHANNEL=wecom`
+   - `WECOM_CORP_ID` / `WECOM_AGENT_ID` / `WECOM_SECRET`(必填)
+   - `WECOM_CARD_TYPE=textcard`(文本卡片,带"查看详情"按钮,推荐)或 `markdown`(富文本)
+   - `WECOM_TOUSER=@all`(发全员;只发自己填你的 userid)
+5. 本地验证:`python push_daily.py`(企业微信通道会打日志响应码)。
+
+> 两种通道并存:不配企业微信时保持 `PUSH_CHANNEL=serverchan` 走 Server酱,互不影响。
+
 ## ⚠️ 注意
 
 - SendKey 是密钥,**不要**提交到仓库代码里,只在 GitHub Secret 里配置;
