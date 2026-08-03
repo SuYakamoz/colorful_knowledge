@@ -8,17 +8,24 @@
 set -e
 cd "$(dirname "$0")"
 
-echo "==== 1/5 接入 GitHub 仓库 ===="
-if [ ! -d .git ]; then
-    echo "本目录还不是 git 仓库,开始接入 GitHub..."
-    git init -q
-    git remote add origin https://github.com/SuYakamoz/colorful_knowledge.git
-    git fetch -q origin
-    git checkout -q -t origin/main 2>/dev/null || git checkout -q -b main origin/main
-    echo "已接入 GitHub(仓库文件已同步;本地 .env 不会被覆盖)"
-else
+echo "==== 1/5 接入 GitHub(可选;网络不通也能继续)===="
+GIT_MODE=0
+if [ -d .git ]; then
     echo "已是 git 仓库,拉取最新代码..."
-    git pull -q origin main || echo "(拉取失败,继续用本地版本)"
+    git pull -q origin main 2>/dev/null || echo "(拉取失败,继续用本地版本)"
+    GIT_MODE=1
+else
+    echo "本目录不是 git 仓库。尝试接入 GitHub 自动同步..."
+    if git init -q && git remote add origin https://github.com/SuYakamoz/colorful_knowledge.git 2>/dev/null && git fetch -q origin 2>/dev/null; then
+        git checkout -q -t origin/main 2>/dev/null || git checkout -q -b main origin/main
+        echo "已接入 GitHub(以后改代码 push 到 GitHub,服务器每天自动同步)"
+        GIT_MODE=1
+    else
+        rm -rf .git 2>/dev/null
+        echo "⚠️ 无法连接 GitHub(网络问题),继续【手动模式】:"
+        echo "   · 以后更新代码:手动上传文件覆盖即可"
+        echo "   · 想恢复自动同步:网络恢复后 git clone 或重跑本脚本"
+    fi
 fi
 # 数据文件本地化:data/ 由服务器每天写入,不同步回仓库,避免 pull 冲突
 git update-index --skip-worktree data/common_sense.jsonl 2>/dev/null || true
