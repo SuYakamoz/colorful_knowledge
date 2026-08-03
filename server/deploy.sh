@@ -12,7 +12,7 @@ echo "==== 1/5 接入 GitHub 仓库 ===="
 if [ ! -d .git ]; then
     echo "本目录还不是 git 仓库,开始接入 GitHub..."
     git init -q
-    git remote add origin https://github.com/SuYakamoz/colorful-_knowledge.git
+    git remote add origin https://github.com/SuYakamoz/colorful_knowledge.git
     git fetch -q origin
     git checkout -q -t origin/main 2>/dev/null || git checkout -q -b main origin/main
     echo "已接入 GitHub(仓库文件已同步;本地 .env 不会被覆盖)"

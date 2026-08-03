@@ -89,7 +89,7 @@ WECOM_AGENT_ID = get_secret("WECOM_AGENT_ID")               # 自建应用 Agent
 WECOM_SECRET = get_secret("WECOM_SECRET")                   # 自建应用 Secret
 WECOM_TOUSER = get_secret("WECOM_TOUSER", "@all")           # 接收人(默认全员;单人填你的企业微信 userid)
 WECOM_CARD_TYPE = get_secret("WECOM_CARD_TYPE", "textcard") # 卡片类型:"textcard"(文本卡片)或 "markdown"
-WECOM_CARD_URL = get_secret("WECOM_CARD_URL", "https://github.com/SuYakamoz/colorful-_knowledge")  # textcard 点击跳转链接
+WECOM_CARD_URL = get_secret("WECOM_CARD_URL", "https://github.com/SuYakamoz/colorful_knowledge")  # textcard 点击跳转链接
 
 # ============================================================
 # 生效值(一般不用改)
