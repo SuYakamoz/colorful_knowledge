@@ -24,7 +24,15 @@
 fetch("data/latest.json").then(r => r.ok ? r.json() : null).then(latest => {
   const el = document.getElementById("latest");
   if (!latest || !latest.items || !latest.items.length) { el.innerHTML = ""; return; }
+  var lunarHtml = "";
+  if (latest.lunar) {
+    lunarHtml = '<div class="item" style="color:#B45309"><span class="tag">📅</span>' +
+      latest.lunar.lunar + " · " + latest.lunar.ganzhi +
+      (latest.lunar.term ? " · ☀️" + latest.lunar.term : "") +
+      (latest.lunar.festival ? " · 🎉" + latest.lunar.festival : "") + '</div>';
+  }
   el.innerHTML = '<div class="day" style="border:2px solid #4F46E5"><div class="date">📌 今日卡片 · ' + latest.date +
+    (latest.source === "ai" ? "" : "（知识库兜底）") + '</div>' + lunarHtml +
     (latest.source === "ai" ? "" : "（知识库兜底）") + '</div>' +
     latest.items.map(i => '<div class="item"><span class="tag">' + i.category + '</span>' + i.content + '</div>').join("") +
     '</div>';

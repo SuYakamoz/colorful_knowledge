@@ -44,6 +44,7 @@ from config import (
     WECOM_TOUSER,
 )
 from knowledge_base import CATEGORY_ICONS, KNOWLEDGE_BASE
+from lunar import get_today_lunar
 
 
 def pick_daily_items(count: int = DAILY_COUNT) -> list[tuple[str, str]]:
@@ -100,13 +101,24 @@ def icon_for(category: str) -> str:
     return "📌"
 
 
+def build_lunar_line() -> str:
+    """今日农历信息行(日期 + 干支 + 节气/节日)。"""
+    info = get_today_lunar()
+    parts = [info["lunar"], info["ganzhi"]]
+    if info["term"]:
+        parts.append(f"☀️{info['term']}")
+    if info["festival"]:
+        parts.append(f"🎉{info['festival']}")
+    return "📅 " + " · ".join(parts)
+
+
 def build_message(items: list[tuple[str, str]]) -> tuple[str, str]:
-    """把选中的常识拼成 (标题, 内容)。"""
+    """把农历信息 + 选中的常识拼成 (标题, 内容)。"""
     title = "📚 今日常识 3 条"
-    lines = []
+    lines = [build_lunar_line(), ""]
     for cat, text in items:
         lines.append(f"{icon_for(cat)}【{cat}】{text}")
-    return title, "\n\n".join(lines)
+    return title, "\n".join(lines)
 
 
 def save_items(items: list[tuple[str, str]], source: str) -> bool:
@@ -140,7 +152,7 @@ def save_items(items: list[tuple[str, str]], source: str) -> bool:
     # ② 最新一次推送(每次覆盖,不受幂等限制 → 详情页与卡片内容一致)
     try:
         os.makedirs(os.path.dirname(DATA_LATEST_FILE) or ".", exist_ok=True)
-        latest = {"date": today, "source": source,
+        latest = {"date": today, "source": source, "lunar": get_today_lunar(),
                   "items": [{"category": cat, "content": text} for cat, text in items]}
         with open(DATA_LATEST_FILE, "w", encoding="utf-8") as f:
             json.dump(latest, f, ensure_ascii=False, indent=2)
