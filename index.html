@@ -17,8 +17,18 @@
 </head>
 <body>
 <h1>📚 多彩知识宝盒</h1>
+<div id="latest"><div class="empty">加载中…</div></div>
 <div id="list"><div class="empty">加载中…</div></div>
 <script>
+// 今日卡片(与最近一次推送一致)
+fetch("data/latest.json").then(r => r.ok ? r.json() : null).then(latest => {
+  const el = document.getElementById("latest");
+  if (!latest || !latest.items || !latest.items.length) { el.innerHTML = ""; return; }
+  el.innerHTML = '<div class="day" style="border:2px solid #4F46E5"><div class="date">📌 今日卡片 · ' + latest.date +
+    (latest.source === "ai" ? "" : "（知识库兜底）") + '</div>' +
+    latest.items.map(i => '<div class="item"><span class="tag">' + i.category + '</span>' + i.content + '</div>').join("") +
+    '</div>';
+}).catch(() => {});
 fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
   const rows = text.trim().split("\n").filter(Boolean).map(l => JSON.parse(l)).reverse();
   const el = document.getElementById("list");

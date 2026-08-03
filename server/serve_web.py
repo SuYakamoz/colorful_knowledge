@@ -19,6 +19,7 @@ ALLOWED = {
     "/": "index.html",
     "/index.html": "index.html",
     "/data/common_sense.jsonl": "data/common_sense.jsonl",
+    "/data/latest.json": "data/latest.json",
     "/assets/logo.png": "assets/logo.png",
 }
 

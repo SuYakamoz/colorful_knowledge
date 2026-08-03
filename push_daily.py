@@ -31,6 +31,7 @@ from config import (
     AI_USER_PROMPT,
     DAILY_COUNT,
     DATA_FILE,
+    DATA_LATEST_FILE,
     PUSH_CHANNEL,
     SAVE_ENABLED,
     SERVERCHAN_API,
@@ -109,15 +110,12 @@ def build_message(items: list[tuple[str, str]]) -> tuple[str, str]:
 
 
 def save_items(items: list[tuple[str, str]], source: str) -> bool:
-    """把本次常识追加保存到 DATA_FILE(按日期幂等),成功返回 True。
+    """把本次常识落盘:①按天幂等写积累文件;②总是更新"最新一次"文件(详情页显示今日卡片)。"""
+    today = date.today().isoformat()
 
-    每行一个 JSON 对象:{"date": "...", "source": "ai|fallback", "category": ..., "content": ...}
-    方便以后导入数据库 / 做网站。
-    """
+    # ① 积累文件(按日期幂等,保证数据干净:每天最多 3 条)
     try:
         os.makedirs(os.path.dirname(DATA_FILE) or ".", exist_ok=True)
-        today = date.today().isoformat()
-        # 读取已有行,当天已存过则跳过(幂等,避免重复)
         existing_dates = set()
         if os.path.exists(DATA_FILE):
             with open(DATA_FILE, encoding="utf-8") as f:
@@ -130,16 +128,26 @@ def save_items(items: list[tuple[str, str]], source: str) -> bool:
                             continue
         if today in existing_dates:
             print(f"⏭️ 今天({today})已有记录,跳过落盘(幂等)")
-            return True
-        with open(DATA_FILE, "a", encoding="utf-8") as f:
-            for cat, text in items:
-                record = {"date": today, "source": source, "category": cat, "content": text}
-                f.write(json.dumps(record, ensure_ascii=False) + "\n")
-        print(f"💾 已落盘 {len(items)} 条 → {DATA_FILE}")
-        return True
+        else:
+            with open(DATA_FILE, "a", encoding="utf-8") as f:
+                for cat, text in items:
+                    record = {"date": today, "source": source, "category": cat, "content": text}
+                    f.write(json.dumps(record, ensure_ascii=False) + "\n")
+            print(f"💾 已落盘 {len(items)} 条 → {DATA_FILE}")
     except OSError as e:
         print(f"⚠️ 落盘失败(不影响推送):{e}")
-        return False
+
+    # ② 最新一次推送(每次覆盖,不受幂等限制 → 详情页与卡片内容一致)
+    try:
+        os.makedirs(os.path.dirname(DATA_LATEST_FILE) or ".", exist_ok=True)
+        latest = {"date": today, "source": source,
+                  "items": [{"category": cat, "content": text} for cat, text in items]}
+        with open(DATA_LATEST_FILE, "w", encoding="utf-8") as f:
+            json.dump(latest, f, ensure_ascii=False, indent=2)
+        print(f"💾 已更新最新推送 → {DATA_LATEST_FILE}")
+    except OSError as e:
+        print(f"⚠️ 更新 latest 失败(不影响推送):{e}")
+    return True
 
 
 def send_serverchan(sendkey: str, title: str, content: str) -> bool:
