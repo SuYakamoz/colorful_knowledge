@@ -5,48 +5,147 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>多彩知识宝盒 · 常识集</title>
 <style>
-  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; background: #f6f7fb; }
-  h1 { text-align: center; color: #4F46E5; }
-  .day { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
-  .date { color: #888; font-size: 13px; margin-bottom: 8px; }
-  .item { margin: 8px 0; line-height: 1.7; }
-  .tag { display: inline-block; background: #EEF2FF; color: #4F46E5; border-radius: 6px; padding: 1px 8px; font-size: 12px; margin-right: 6px; }
-  .src { color: #aaa; font-size: 12px; }
-  .empty { text-align: center; color: #999; padding: 40px 0; }
+  :root {
+    --primary: #4F46E5;
+    --primary-light: #EEF2FF;
+    --gold: #B45309;
+    --text: #1F2937;
+    --text-sub: #6B7280;
+    --card-shadow: 0 2px 12px rgba(79, 70, 229, .08);
+    --card-shadow-hover: 0 8px 24px rgba(79, 70, 229, .16);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", "Noto Sans SC", sans-serif;
+    background: linear-gradient(160deg, #EEF2FF 0%, #F5F3FF 40%, #FDF2F8 100%);
+    min-height: 100vh; color: var(--text); padding: 20px 16px 48px;
+  }
+  .container { max-width: 720px; margin: 0 auto; }
+
+  /* 头部 */
+  .header { text-align: center; margin: 12px 0 24px; }
+  .logo {
+    width: 72px; height: 72px; border-radius: 20px; margin: 0 auto 12px;
+    box-shadow: 0 8px 24px rgba(79, 70, 229, .25); display: block;
+  }
+  h1 {
+    font-size: 26px; font-weight: 800;
+    background: linear-gradient(90deg, #4F46E5, #9333EA, #EC4899);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .subtitle { color: var(--text-sub); font-size: 13px; margin-top: 6px; }
+
+  /* 今日卡片 */
+  .today-card {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 55%, #9333EA 100%);
+    border-radius: 20px; padding: 22px 22px 18px; color: #fff;
+    box-shadow: 0 12px 32px rgba(79, 70, 229, .35); margin-bottom: 20px;
+    position: relative; overflow: hidden;
+  }
+  .today-card::after {
+    content: ""; position: absolute; top: -60px; right: -40px; width: 160px; height: 160px;
+    background: rgba(255,255,255,.08); border-radius: 50%;
+  }
+  .today-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .today-title { font-size: 17px; font-weight: 700; letter-spacing: .5px; }
+  .today-date { font-size: 12px; opacity: .85; background: rgba(255,255,255,.15); padding: 3px 10px; border-radius: 999px; }
+  .lunar-line {
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+    border-radius: 12px; padding: 8px 12px; margin-bottom: 10px;
+    font-size: 13px; color: #FFF7ED;
+  }
+  .today-item { display: flex; gap: 8px; margin: 9px 0; font-size: 14.5px; line-height: 1.65; }
+  .today-item .tag { flex-shrink: 0; }
+
+  /* 分类标签 */
+  .tag {
+    display: inline-block; border-radius: 8px; padding: 2px 10px;
+    font-size: 12px; font-weight: 600; color: #fff; white-space: nowrap;
+  }
+  .tag[data-c="金融"] { background: #F59E0B; } .tag[data-c="职场"] { background: #3B82F6; }
+  .tag[data-c="生活"] { background: #F97316; } .tag[data-c="科学"] { background: #8B5CF6; }
+  .tag[data-c="历史"] { background: #92400E; } .tag[data-c="健康"] { background: #10B981; }
+  .tag[data-c="冷知识"] { background: #EC4899; } .tag[data-c="法律"] { background: #6366F1; }
+  .tag[data-c="科技"] { background: #0EA5E9; } .tag[data-c="心理"] { background: #14B8A6; }
+  .tag[data-c="安全"] { background: #EF4444; } .tag[data-c="商业"] { background: #D97706; }
+  .tag[data-c="教育"] { background: #84CC16; } .tag[data-c="地理"] { background: #06B6D4; }
+  .tag[data-c="运动"] { background: #EA580C; } .tag[data-c="文化"] { background: #A855F7; }
+  .tag[data-c="默认"] { background: #6B7280; }
+
+  /* 历史列表 */
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text-sub); margin: 8px 4px 12px; }
+  .day-card {
+    background: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 12px;
+    box-shadow: var(--card-shadow); transition: transform .18s, box-shadow .18s;
+  }
+  .day-card:hover { transform: translateY(-2px); box-shadow: var(--card-shadow-hover); }
+  .day-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .day-date { font-weight: 700; font-size: 14px; color: var(--primary); }
+  .day-src { font-size: 11px; color: #B45309; background: #FEF3C7; padding: 2px 8px; border-radius: 999px; }
+  .day-item { display: flex; gap: 8px; margin: 7px 0; font-size: 14px; line-height: 1.7; color: #374151; }
+  .day-item .tag { flex-shrink: 0; margin-top: 1px; }
+
+  .empty { text-align: center; color: #9CA3AF; padding: 48px 0; font-size: 14px; }
+  .footer { text-align: center; color: #9CA3AF; font-size: 12px; margin-top: 28px; }
 </style>
 </head>
 <body>
-<h1>📚 多彩知识宝盒</h1>
-<div id="latest"><div class="empty">加载中…</div></div>
-<div id="list"><div class="empty">加载中…</div></div>
+<div class="container">
+  <div class="header">
+    <img class="logo" src="assets/logo.png" alt="多彩知识宝盒">
+    <h1>多彩知识宝盒</h1>
+    <div class="subtitle">每天 3 条常识 · 天天长知识</div>
+  </div>
+
+  <div id="latest"><div class="empty">加载中…</div></div>
+
+  <div class="section-title">📚 历史积累</div>
+  <div id="list"><div class="empty">加载中…</div></div>
+
+  <div class="footer" id="footer"></div>
+</div>
+
 <script>
-// 今日卡片(与最近一次推送一致)
+// 分类标签配色(前缀匹配)
+function tag(cat) {
+  var key = "默认";
+  var map = ["金融","职场","生活","科学","历史","健康","冷知识","法律","科技","心理","安全","商业","教育","地理","运动","文化"];
+  for (var i = 0; i < map.length; i++) {
+    if (cat.indexOf(map[i]) !== -1) { key = map[i]; break; }
+  }
+  return '<span class="tag" data-c="' + key + '">' + cat + '</span>';
+}
+
+// 今日卡片(与最近一次推送一致,含农历)
 fetch("data/latest.json").then(r => r.ok ? r.json() : null).then(latest => {
-  const el = document.getElementById("latest");
+  var el = document.getElementById("latest");
   if (!latest || !latest.items || !latest.items.length) { el.innerHTML = ""; return; }
   var lunarHtml = "";
   if (latest.lunar) {
-    lunarHtml = '<div class="item" style="color:#B45309"><span class="tag">📅</span>' +
-      latest.lunar.lunar + " · " + latest.lunar.ganzhi +
+    lunarHtml = '<div class="lunar-line">📅 ' + latest.lunar.lunar + " · " + latest.lunar.ganzhi +
       (latest.lunar.term ? " · ☀️" + latest.lunar.term : "") +
       (latest.lunar.festival ? " · 🎉" + latest.lunar.festival : "") + '</div>';
   }
-  el.innerHTML = '<div class="day" style="border:2px solid #4F46E5"><div class="date">📌 今日卡片 · ' + latest.date +
-    (latest.source === "ai" ? "" : "（知识库兜底）") + '</div>' + lunarHtml +
-    (latest.source === "ai" ? "" : "（知识库兜底）") + '</div>' +
-    latest.items.map(i => '<div class="item"><span class="tag">' + i.category + '</span>' + i.content + '</div>').join("") +
+  el.innerHTML = '<div class="today-card">' +
+    '<div class="today-head"><span class="today-title">📌 今日卡片</span>' +
+    '<span class="today-date">' + latest.date + '</span></div>' + lunarHtml +
+    latest.items.map(i => '<div class="today-item">' + tag(i.category) + '<span>' + i.content + '</span></div>').join("") +
     '</div>';
 }).catch(() => {});
+
+// 历史积累(按日期分组)
 fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
-  const rows = text.trim().split("\n").filter(Boolean).map(l => JSON.parse(l)).reverse();
-  const el = document.getElementById("list");
-  if (!rows.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
-  const byDate = {};
+  var rows = text.trim().split("\n").filter(Boolean).map(l => JSON.parse(l)).reverse();
+  var el = document.getElementById("list");
+  if (!rows.length) { el.innerHTML = '<div class="empty">暂无数据,明天开始积累</div>'; return; }
+  var byDate = {};
   rows.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
   el.innerHTML = Object.entries(byDate).map(([d, items]) =>
-    `<div class="day"><div class="date">${d}${items[0].source === "ai" ? "" : "（知识库兜底）"}</div>` +
-    items.map(i => `<div class="item"><span class="tag">${i.category}</span>${i.content}</div>`).join("") +
-    `</div>`).join("");
+    '<div class="day-card"><div class="day-head"><span class="day-date">' + d + '</span>' +
+    (items[0].source === "ai" ? "" : '<span class="day-src">知识库兜底</span>') + '</div>' +
+    items.map(i => '<div class="day-item">' + tag(i.category) + '<span>' + i.content + '</span></div>').join("") +
+    '</div>').join("");
+  document.getElementById("footer").textContent = "共积累 " + rows.length + " 条常识";
 }).catch(() => { document.getElementById("list").innerHTML = '<div class="empty">数据读取失败</div>'; });
 </script>
 </body>
