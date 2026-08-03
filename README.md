@@ -1,157 +1,82 @@
-# 📚 常识每日推送(微信)
+# 📚 多彩知识宝盒
 
-每天定时往你的微信推送 **3 条不同类别**的常识(生活 / 科学 / 历史 / 健康 / 冷知识随机三样)。
+**每天自动推送 3 条不同领域的常识到你的微信,并持续积累内容,为你的个人知识网站铺路。**
+
+AI(DeepSeek)每天现场生成新鲜常识 → 企业微信官方 API 发送卡片 → 个人微信接收 → 点击可看详情页,内容自动积累成结构化数据。
+
+## ✨ 功能特性
+
+- 🤖 **AI 每日生成**:按设定角色(16 类领域池)现场生成 3 条不同领域常识,内容天天新鲜、不重复;
+- 🛡️ **双保险不中断**:AI 不可用时自动回退内置知识库,保证每天都有推送;
+- 💬 **微信接收**:通过企业微信官方 API 发送 textcard 卡片,个人微信即可收到(无需安装额外 App);
+- 📄 **详情页**:点卡片"查看详情"打开自建的常识展示页,按日期浏览全部积累;
+- 💾 **数据积累**:每天内容自动追加为 JSONL 结构化数据(`data/common_sense.jsonl`),随时可用于建站/分析;
+- 🔧 **零维护部署**:服务器 cron 定时 + systemd 守护 + Git 自动同步,改代码只需推送 GitHub。
+
+## 🏗️ 架构
 
 ```
-🤖 DeepSeek 每天按「常识编辑」角色生成 3 条(失败自动回退知识库)
-   ↓ 每天 08:00 GitHub Actions 自动触发
-Python 脚本整理成一条消息
-   ↓ Server酱 API
-你的微信收到「📚 今日常识 3 条」
+┌──────────┐   ┌──────────────┐   ┌──────────────┐   ┌───────────┐
+│ DeepSeek │ → │ 企业微信 API  │ → │  个人微信     │ → │ 详情页/数据 │
+│ 生成常识  │   │ textcard 卡片 │   │ (微信插件接收) │   │ 积累 JSONL │
+└──────────┘   └──────────────┘   └──────────────┘   └───────────┘
 ```
 
-## 文件结构
+## 🧰 技术栈
 
-| 文件 | 作用 |
-|------|------|
-| `config.py` | **⚙️ 所有配置集中在这里**(改这里,不用翻代码) |
-| `knowledge_base.py` | **兜底**知识库(7 类 × 12 条;AI 不可用时用,可自行扩充) |
-| `push_daily.py` | 主脚本(纯逻辑,配置都从 config.py 读) |
-| `.github/workflows/daily_push.yml` | GitHub Actions 定时工作流(每天 08:00) |
-| `data/common_sense.jsonl` | **每天积累的常识数据**(自动生成,以后做网站的数据源) |
-| `.env`(自己创建) | 本地密钥配置(已 gitignore,不会误传 GitHub) |
+| 层 | 技术 |
+|----|------|
+| 内容生成 | DeepSeek(OpenAI 兼容 API) |
+| 消息推送 | 企业微信自建应用(官方 API) |
+| 定时调度 | 服务器 cron(每天 08:00) |
+| 服务守护 | systemd(详情页服务开机自启) |
+| 代码同步 | Git + GitHub(服务器每日自动 pull) |
+| 详情页 | 轻量 Python 静态服务 + 前端页面 |
 
-## 🚀 上手三步(都需要你本人操作,约 10 分钟)
+## 🚀 快速开始
 
-### 第 1 步:注册 Server酱,拿到 SendKey
+> 需要准备:DeepSeek API Key、企业微信自建应用、一台有公网 IP 的服务器。
 
-1. 打开 https://sct.ftqq.com ,用 GitHub 账号登录(没有就注册一个);
-2. 登录后点击「SendKey」菜单,复制你的 SendKey(一串字符);
-3. 按页面提示**微信扫码关注「方糖」服务号**——这是接收推送的入口。
+1. **克隆代码**:
+   ```bash
+   git clone https://github.com/SuYakamoz/colorful_knowledge.git
+   cd colorful_knowledge
+   ```
+2. **配置密钥**:复制 `.env.example` 为 `.env`,填入你的密钥(DeepSeek key、企业微信三件套等;`.env` 已被 gitignore,不会提交);
+3. **本地试跑**(只打印不发送):
+   ```bash
+   python push_daily.py --dry-run --ai
+   ```
+4. **服务器部署**(自动配置定时与详情页服务):
+   ```bash
+   bash server/deploy.sh
+   ```
+   详细部署步骤见 `server/` 下脚本注释。
 
-> 免费额度:每天 5 条,完全够用。
+## 📁 目录结构
 
-### 第 2 步:建 GitHub 仓库并上传本项目
-
-1. 打开 https://github.com/new ,仓库名随便(如 `common-sense-push`),选 Public 或 Private 都行,创建;
-2. 把本文件夹里的这些文件上传进仓库(网页上点 Add file → Upload files,或 git 推送):
-   - `config.py`
-   - `knowledge_base.py`
-   - `push_daily.py`
-   - `.gitignore`
-   - `.github/workflows/daily_push.yml`(注意保留 `.github/workflows` 目录结构)
-   - ⚠️ **不要**上传 `.env`(本地密钥文件,已被 .gitignore 忽略)
-3. 到仓库页面 **Settings → Secrets and variables → Actions → New repository secret**,依次添加 Secret:
-   - `SERVERCHAN_SENDKEY` = 第 1 步复制的 SendKey(必配);
-   - `DEEPSEEK_API_KEY` = 你的 DeepSeek API Key(必配,platform.deepseek.com 申请);
-   - `DEEPSEEK_MODEL` = 模型名,**可选**(不配默认 `deepseek-chat`);
-   - `DEEPSEEK_BASE_URL` = 接口地址,**可选**(不配默认 `https://api.deepseek.com`)。
-   - 各自保存。
-
-### 第 3 步:手动测试,然后等定时
-
-1. 打开仓库的 **Actions** 页签;
-2. 左侧选 **Daily Common Sense Push** → 右侧 **Run workflow** → 绿色按钮;
-3. 等 1-2 分钟,跑完看绿色 ✅,你的微信就会收到第一条常识;
-4. 确认收到后就不用管了——之后**每天北京时间 08:00** 自动推送。
-
-> ⏰ 说明:GitHub Actions 的定时用的是 UTC 时间,`0 0 * * *` = 北京 08:00。偶尔可能有几分钟延迟,属正常。
-
-## 🛠 本地调试(可选)
-
-在装有 Python 3.10+ 的电脑上:
-
-```bash
-python push_daily.py --dry-run     # 只打印消息,不发送
-set SERVERCHAN_SENDKEY=你的SendKey # Windows
-python push_daily.py               # 真实发送到微信
+```
+colorful_knowledge/
+├── push_daily.py            # 主脚本:AI 生成 + 推送 + 落盘
+├── config.py                # 所有可调配置(改这里)
+├── knowledge_base.py        # 兜底知识库(AI 不可用时用)
+├── index.html               # 常识详情页
+├── data/common_sense.jsonl  # 每天积累的常识数据(网站数据源)
+├── server/                  # 服务器侧:部署脚本/详情页服务/systemd
+├── assets/                  # Logo 等资源
+└── .env.example             # 密钥模板(复制为 .env 填写)
 ```
 
-## ✏️ 自定义
+## ⚙️ 配置说明
 
-| 想改什么 | 改哪里 |
-|---------|--------|
-| 推送时间 | `.github/workflows/daily_push.yml` 里的 `cron`(UTC 时间) |
-| 每天几条(默认 3) | `push_daily.py` 里 `DAILY_COUNT = 3` |
-| 常识内容 | 直接在 `knowledge_base.py` 的列表里加/改句子 |
-| 加新类别 | 在 `KNOWLEDGE_BASE` 加一个列表 + 在 `CATEGORY_ICONS` 加图标即可 |
+所有可调项集中在 `config.py`(每天条数、AI 模型、角色设定、推送通道、卡片类型等),密钥放 `.env`,两者分离、互不混入。改完代码推送 GitHub,服务器次日自动生效。
 
-## 🤖 AI 生成模式(默认开启)
+## 🔒 安全设计
 
-- **工作原理**:每天 GitHub Actions 触发时,`push_daily.py` 先调用 DeepSeek,按 `AI_SYSTEM_PROMPT` 里设定的「博学常识编辑」角色,现场生成 3 条不同领域的常识(JSON 格式);
-- **自动兜底**:AI 失败(网络/没 key/解析错误)时,自动回退到 `knowledge_base.py` 随机抽 3 条,保证每天都有推送、不会断更;
-- **改角色/要求**:编辑 `push_daily.py` 里的 `AI_SYSTEM_PROMPT` 字符串即可(比如改成"用幽默风格"、"必须包含一个数据点"等);
-- **本地试 AI 效果**:`python push_daily.py --dry-run --ai`(需在环境变量配好 `DEEPSEEK_API_KEY`);
-- **想完全不用 AI**:`python push_daily.py --no-ai`。
+- 密钥(`.env`)已被 `.gitignore` 忽略,永不进入代码仓库;
+- 详情页使用白名单静态服务,仅暴露网页所需文件,其余(含密钥文件)一律 403;
+- 企业微信调用受「可信 IP」白名单保护。
 
-> 💰 费用:每天一次 DeepSeek 调用,约几百 token,DeepSeek 充值几块钱能用很久。
+## 📝 License
 
-> 📌 **注意区分**:你桌面 `Agent` 教学项目里也有一个 `.env`(那是 LangChain 教学用的,含 `DEEPSEEK_MODEL_URL` 等变量);本推送项目用的是**自己文件夹里**的 `.env`(键名是 `DEEPSEEK_API_KEY`/`SERVERCHAN_SENDKEY`),两者互不影响,别改错文件。
-
-## 🔄 自定义 AI 模型(换任意 OpenAI 兼容模型)
-
-脚本完全通过环境变量控制模型,不换代码就能换模型:
-
-| 环境变量 | 默认值 | 说明 |
-|---------|--------|------|
-| `DEEPSEEK_API_KEY` | 无(必填) | API 密钥 |
-| `DEEPSEEK_MODEL` | `deepseek-chat` | 模型名,如 `qwen-plus`(通义)/ `glm-4`(智谱)/ `gpt-4o-mini`(OpenAI) |
-| `DEEPSEEK_BASE_URL` | `https://api.deepseek.com` | 接口地址,换厂商时改成对应 base_url(注意不要带 `/v1` 或带不带取决于厂商) |
-
-在 GitHub 上改对应 Secret 即可;本地运行则设同名环境变量。
-
-## 📊 数据积累(为以后做网站)
-
-- 每天生成(或回退)的常识会**自动追加**到仓库 `data/common_sense.jsonl`,并由 workflow 自动提交回仓库;
-- 每行一条 JSON,格式(方便以后导入数据库 / 做网站):
-
-```json
-{"date": "2026-08-03", "source": "ai", "category": "科学", "content": "光速约为每秒 30 万公里……"}
-```
-
-- 字段说明:`date` 日期(按天幂等,同一天不会重复存)、`source` 来源(`ai`=AI 生成 / `fallback`=知识库回退)、`category` 类别、`content` 内容;
-- 想关闭落盘:运行加 `--no-save`(或在 workflow 的 run 那行改为 `python push_daily.py --no-save`);
-- 积累一段时间后,把 `data/common_sense.jsonl` 导入数据库/生成静态站,就是你的常识网站数据源。
-
-## ⚙️ 配置文件 config.py(最重要)
-
-**所有可调项都集中在 `config.py`,改完不用动其他文件**:
-
-| 配置项 | 默认值 | 改成什么 |
-|--------|--------|---------|
-| `DAILY_COUNT` | `3` | 每天几条常识(3~5) |
-| `AI_MODEL` | `deepseek-chat` | 想换模型改这里(如 `qwen-plus`/`glm-4`/`gpt-4o-mini`) |
-| `AI_BASE_URL` | `https://api.deepseek.com` | 换厂商时改对应接口地址 |
-| `AI_TEMPERATURE` | `0.9` | 生成随机性(0~1) |
-| `AI_SYSTEM_PROMPT` | 16 类领域池 | **AI 角色设定**:领域池、风格、字数要求都在这里 |
-| `SAVE_ENABLED` | `True` | 是否落盘保存数据 |
-| `DATA_FILE` | `data/common_sense.jsonl` | 数据保存路径 |
-| `SERVERCHAN_API` | Server酱接口 | 换推送通道时改 |
-
-**密钥**不写在 config.py 里,放 `.env`(本地)或 GitHub Secret(云端):
-- **本地**:把项目里的 `.env.example` **复制一份改名为 `.env`**,填入你的密钥即可(文件里每项都有申请说明);
-  - `DEEPSEEK_API_KEY` = DeepSeek key(platform.deepseek.com 申请);
-  - `SERVERCHAN_SENDKEY` = Server酱 SendKey(sct.ftqq.com 注册,微信扫码关注后获取);
-- **云端**:不用复制 `.env`,直接在 GitHub 仓库配同名 Secret(`SERVERCHAN_SENDKEY`、`DEEPSEEK_API_KEY` 必配,`DEEPSEEK_MODEL`、`DEEPSEEK_BASE_URL` 可选),自动优先生效。
-
-## 💬 推送通道二选一
-
-**默认用 Server酱**(微信服务号,简单);想用**企业微信真卡片**(官方 API,不经过第三方,支持 textcard/markdown 卡片样式),按下面配置:
-
-1. 免费注册企业微信:https://qy.weixin.qq.com(个人也能注册,不需要营业执照);
-2. **应用管理 → 创建应用**(自建)→ 记下三个值:`CorpID`(我的企业→企业信息)、`AgentId`、`Secret`;
-3. 应用详情里设置**可见范围**包含你自己(或全员),在"微信插件"里扫码关注你的企业微信(消息可直接进微信);
-4. 在 `.env`(本地)或 GitHub Secret(云端)配置:
-   - `PUSH_CHANNEL=wecom`
-   - `WECOM_CORP_ID` / `WECOM_AGENT_ID` / `WECOM_SECRET`(必填)
-   - `WECOM_CARD_TYPE=textcard`(文本卡片,带"查看详情"按钮,推荐)或 `markdown`(富文本)
-   - `WECOM_TOUSER=@all`(发全员;只发自己填你的 userid)
-5. 本地验证:`python push_daily.py`(企业微信通道会打日志响应码)。
-
-> 两种通道并存:不配企业微信时保持 `PUSH_CHANNEL=serverchan` 走 Server酱,互不影响。
-
-## ⚠️ 注意
-
-- SendKey 是密钥,**不要**提交到仓库代码里,只在 GitHub Secret 里配置;
-- 项目只在 GitHub Actions 云端运行,本地电脑不需要开机;
-- 知识库初始 60 条,每天 3 条可抽约 20 天不重样(随机);想长期用建议逐步扩充到几百条。
+MIT
