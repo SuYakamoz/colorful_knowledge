@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>多彩知识宝盒 · 常识集</title>
+<style>
+  body { font-family: "PingFang SC", "Microsoft YaHei", sans-serif; max-width: 720px; margin: 0 auto; padding: 16px; background: #f6f7fb; }
+  h1 { text-align: center; color: #4F46E5; }
+  .day { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .date { color: #888; font-size: 13px; margin-bottom: 8px; }
+  .item { margin: 8px 0; line-height: 1.7; }
+  .tag { display: inline-block; background: #EEF2FF; color: #4F46E5; border-radius: 6px; padding: 1px 8px; font-size: 12px; margin-right: 6px; }
+  .src { color: #aaa; font-size: 12px; }
+  .empty { text-align: center; color: #999; padding: 40px 0; }
+</style>
+</head>
+<body>
+<h1>📚 多彩知识宝盒</h1>
+<div id="list"><div class="empty">加载中…</div></div>
+<script>
+fetch("data/common_sense.jsonl").then(r => r.text()).then(text => {
+  const rows = text.trim().split("\n").filter(Boolean).map(l => JSON.parse(l)).reverse();
+  const el = document.getElementById("list");
+  if (!rows.length) { el.innerHTML = '<div class="empty">暂无数据</div>'; return; }
+  const byDate = {};
+  rows.forEach(r => { (byDate[r.date] = byDate[r.date] || []).push(r); });
+  el.innerHTML = Object.entries(byDate).map(([d, items]) =>
+    `<div class="day"><div class="date">${d}${items[0].source === "ai" ? "" : "（知识库兜底）"}</div>` +
+    items.map(i => `<div class="item"><span class="tag">${i.category}</span>${i.content}</div>`).join("") +
+    `</div>`).join("");
+}).catch(() => { document.getElementById("list").innerHTML = '<div class="empty">数据读取失败</div>'; });
+</script>
+</body>
+</html>

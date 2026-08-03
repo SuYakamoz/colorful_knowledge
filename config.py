@@ -92,8 +92,9 @@ WECOM_CORP_ID = get_secret("WECOM_CORP_ID")                 # 企业 ID
 WECOM_AGENT_ID = get_secret("WECOM_AGENT_ID")               # 自建应用 AgentId
 WECOM_SECRET = get_secret("WECOM_SECRET")                   # 自建应用 Secret
 WECOM_TOUSER = get_secret("WECOM_TOUSER", "@all")           # 接收人(默认全员;单人填你的企业微信 userid)
-# 卡片类型:"markdown"(富文本,直接显示内容,推荐)/ "textcard"(文本卡片带跳转按钮,需配合 WECOM_CARD_URL)
-WECOM_CARD_TYPE = get_secret("WECOM_CARD_TYPE", "markdown")
+# 卡片类型:"textcard"(文本卡片,个人微信/企业微信都能显示,推荐)/ "markdown"(富文本,仅企业微信 App 内显示)
+# ⚠️ 要在个人微信(微信插件)收到,必须用 textcard;markdown 在个人微信会显示"暂不支持此消息类型"
+WECOM_CARD_TYPE = get_secret("WECOM_CARD_TYPE", "textcard")
 WECOM_CARD_URL = get_secret("WECOM_CARD_URL", "https://github.com/SuYakamoz/colorful_knowledge")  # textcard 点击跳转链接
 
 # ============================================================
