@@ -177,6 +177,14 @@ def send_wecom_message(token: str, agentid: str, payload: dict) -> bool:
     return body.get("errcode") == 0
 
 
+def truncate_bytes(s: str, limit: int) -> str:
+    """按 UTF-8 字节数截断(企业微信限制按字节算,中文 1 字≈3 字节),避免截断半个中文。"""
+    b = s.encode("utf-8")
+    if len(b) <= limit:
+        return s
+    return b[:limit].decode("utf-8", errors="ignore")
+
+
 def send_wecom(title: str, items: list[tuple[str, str]]) -> bool:
     """企业微信通道入口:按 WECOM_CARD_TYPE 发 textcard 卡片或 markdown 卡片。"""
     if not (WECOM_CORP_ID and WECOM_AGENT_ID and WECOM_SECRET):
@@ -184,12 +192,14 @@ def send_wecom(title: str, items: list[tuple[str, str]]) -> bool:
     token = get_wecom_token(WECOM_CORP_ID, WECOM_SECRET)
     lines = [f"{icon_for(cat)}【{cat}】{text}" for cat, text in items]
     if WECOM_CARD_TYPE == "markdown":
+        # markdown 卡片上限 2048 字节,3 条常识足够;截断保护
         md_content = f"## {title}\n" + "\n".join(f"> {line}" for line in lines)
+        md_content = truncate_bytes(md_content, 2048)
         return send_wecom_message(token, WECOM_AGENT_ID,
                                   {"touser": WECOM_TOUSER, "msgtype": "markdown",
                                    "markdown": {"content": md_content}})
-    # 默认 textcard 卡片(描述限 512 字,截断保护)
-    desc = "\n".join(lines)[:512]
+    # textcard 卡片:description 上限 512 字节,按字节截断(避免中文截断)
+    desc = truncate_bytes("\n".join(lines), 512)
     return send_wecom_message(token, WECOM_AGENT_ID,
                               {"touser": WECOM_TOUSER, "msgtype": "textcard",
                                "textcard": {"title": title, "description": desc,
