@@ -16,6 +16,7 @@ import base64
 import hashlib
 import os
 import struct
+import urllib.parse
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 from cryptography.hazmat.primitives import padding
@@ -54,21 +55,28 @@ class Handler(BaseHTTPRequestHandler):
         if len(q) < 2:
             self._ok("success")
             return
-        params = dict(p.split("=", 1) for p in q[1].split("&") if "=" in p)
+        params = dict(
+            (k, urllib.parse.unquote_plus(v))
+            for k, v in (p.split("=", 1) for p in q[1].split("&") if "=" in p)
+        )
         msg_signature = params.get("msg_signature", "")
         timestamp = params.get("timestamp", "")
         nonce = params.get("nonce", "")
-        echostr = params.get("echostr", "")
+        echostr = params.get("echostr", "")  # 已做 URL 解码,恢复原始 base64 字符
+        print(f"[verify] echostr 前 30 字符:{echostr[:30]}")
         if not (TOKEN and AES_KEY):
             self._ok("error: 未配置 TOKEN/AES_KEY")
             return
         if not verify_signature(TOKEN, timestamp, nonce, echostr, msg_signature):
+            print(f"[verify] 签名校验失败 timestamp={timestamp} nonce={nonce}")
             self._ok("error: 签名校验失败")
             return
         try:
             text = decrypt_echostr(echostr, AES_KEY)
+            print(f"[verify] 解密成功,返回明文长度 {len(text)}")
             self._ok(text)  # 返回明文即验证通过
         except Exception as e:
+            print(f"[verify] 解密失败:{e}")
             self._ok(f"error: {e}")
 
     def do_POST(self):
