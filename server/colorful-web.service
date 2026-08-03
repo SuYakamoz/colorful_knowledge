@@ -1,0 +1,14 @@
+[Unit]
+Description=多彩知识宝盒 - 常识详情页服务(白名单静态服务)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/root/colorful-knowledge
+# 服务详情页:白名单,仅暴露 index.html / data / assets
+ExecStart=/usr/bin/python3 /root/colorful-knowledge/server/serve_web.py 8001
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
