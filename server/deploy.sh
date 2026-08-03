@@ -51,8 +51,14 @@ python3 push_daily.py
 echo "==== 5/5 设置时区与定时任务 ===="
 sudo timedatectl set-timezone Asia/Shanghai 2>/dev/null && echo "时区已设为北京时间" || echo "提示:无法自动设时区,请确认服务器时区为北京时间(否则定时按服务器本地时间)"
 SCRIPT_DIR="$PWD"
-(crontab -l 2>/dev/null | grep -v "colorful-knowledge"; echo "0 8 * * * cd $SCRIPT_DIR && git pull -q origin main && /usr/bin/python3 $SCRIPT_DIR/push_daily.py >> $SCRIPT_DIR/push.log 2>&1 # colorful-knowledge") | crontab -
-echo "定时任务已配置:每天 08:00 先自动拉 GitHub 最新代码,再推送"
+if [ "$GIT_MODE" = "1" ]; then
+    CRON_CMD="cd $SCRIPT_DIR && git pull -q origin main && /usr/bin/python3 $SCRIPT_DIR/push_daily.py >> $SCRIPT_DIR/push.log 2>&1"
+    echo "定时任务已配置:每天 08:00 先自动拉 GitHub 最新代码,再推送"
+else
+    CRON_CMD="cd $SCRIPT_DIR && /usr/bin/python3 $SCRIPT_DIR/push_daily.py >> $SCRIPT_DIR/push.log 2>&1"
+    echo "定时任务已配置:每天 08:00 自动推送(手动模式,无自动同步)"
+fi
+(crontab -l 2>/dev/null | grep -v "colorful-knowledge"; echo "0 8 * * * $CRON_CMD # colorful-knowledge") | crontab -
 
 echo ""
 echo "==== 部署完成 ===="
